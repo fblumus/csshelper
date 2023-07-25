@@ -23,7 +23,7 @@ autor="fblumus"
 version="0.1 Beta"
 
 # Initialize variables
-API_KEY=""
+API_KEY="Your_API_KEY"
 Cheat_Sheet="https://book.hacktricks.xyz/generic-methodologies-and-resources/basic-forensic-methodology/memory-dump-analysis/volatility-cheatsheet"
 profile=""
 selected_file=""
@@ -427,7 +427,7 @@ main() {
 
         4) # Command line
             show_submenu command_line[@]
-            read -p "-> "subchoice_command_line
+            read -p "-> " subchoice_command_line
             case $subchoice_command_line in
                 0)
                     run_and_display "cmdline"
