@@ -3,3 +3,6 @@ This repository contains a collection of diverse scripts dedicated to cybersecur
 
 # vol2help
 In order to use the Dump proc / VirusTotal function, you need an API key. The instructions for this can be found here: https://support.virustotal.com/hc/en-us/articles/115002088769-Please-give-me-an-API-key. Subsequently, the variable API_KEY="Your_API_KEY" can be adjusted.
+
+## Instructions
+The script must be executable and ideally located in the same directory as the RAM image. To call the script, use ./vol2help.sh
