@@ -48,13 +48,14 @@ def run_command():
     else:   
         tk.messagebox.showerror("Fehler", "Bitte geben Sie ein Ziel an.")
         return
-    
+
     command_str = " ".join(command)
+    bash_command = ["bash", "-c", command_str]
 
     with tempfile.NamedTemporaryFile(mode="w+", delete=False) as temp_file:
         temp_file.write("Input:\n" + command_str + "\n\nOutput:\n")
         temp_file.flush()
-        subprocess.run(command, stdout=temp_file)
+        subprocess.run(bash_command, stdout=temp_file)
 
     subprocess.Popen(["xdg-open", temp_file.name], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
@@ -107,8 +108,8 @@ window = tk.Tk()
 window.title("nmaphelp")
 window.geometry('500x400')
 
-scan_types = ["-sT", "-sS", "-sA", "-sW", "-sM", "-sN", "-sF", "-sX", "-sI", "-sY", "-sZ", "-sU", "-sO"] # -sT	TCP Connect scan, -sS	TCP SYN / stealth / half-open scan, -sA	TCP ACK scan, -sW	TCP Window scan, -sM	TCP Maimon scan (FIN/ACK flags), -sN	TCP Null scan (no flags) ,-sF	TCP FIN scan, -sX	TCP Xmass scan (all flags), -sI	TCP Zombie / Idle scan ,-sY	SCTP INIT scan, -sZ	SCTP COOKIE ECHO scan ,-sU	UDP scan, -sO	IP protocol scan
-port_types = ["-p", "-F", "-p-"]
+scan_types = ["-sT", "-sS", "-sA", "-sW", "-sM", "-sN", "-sF", "-sX", "-sI", "-sY", "-sZ", "-sU", "-sO"] 
+port_types = ["-p", "-F", "-p-", "--exclude-ports", "--top-ports", "--port-ratio"]
 host_discovery_types = ["-sn", "-Pn"]
 version_detection_types = ["-sV", "-A", "-O"]
 firewall_proofing_types = ["-f", "-mtu", "sI", "-source-port", "-data-length", "-randomize-hosts", "-badsum"]
@@ -253,72 +254,109 @@ SCTP INIT Scan:
 
 Angreifer                                   Ziel-Host
 --------                                   ---------
-   |                                            |
+   |                                                |
    |       (1) INIT-Chunks (Verbindungsinitiierung) |
-   | ---------------------------------------> |
-   |                                            |
-   |        (2) INIT-ACK-Antwort (Port offen)    |
-   | <--------------------------------------  |
-   |                                            |
-   |        (3) (Keine INIT-ACK-Antwort)         |
-   |          (Port geschlossen)              X |
-   |                                            |
+   | --------------------------------------->       |
+   |                                                |
+   |        (2) INIT-ACK-Antwort (Port offen)       |
+   | <--------------------------------------        |
+   |                                                |
+   |        (3) (Keine INIT-ACK-Antwort)            |
+   |          (Port geschlossen)              X     |
+   |                                                |
 
 SCTP COOKIE ECHO Scan:
 
 Angreifer                                   Ziel-Host
 --------                                   ---------
-   |                                            |
-   |   (1) Bestehendes SCTP-Verbindungscookie suchen   |
-   | ---------------------------------------> |
-   |                                            |
+   |                                                        |
+   |   (1) Bestehendes SCTP-Verbindungscookie suchen        |
+   | --------------------------------------->               |
+   |                                                        |
    |   (2) COOKIE ECHO-Chunks (Verbindung aufrechterhalten) |
-   |   (mit dem Verbindungscookie)            |
-   | ---------------------------------------> |
-   |                                            |
-   |        (3) COOKIE ECHO-Antwort (Port offen) |
-   | <--------------------------------------  |
-   |                                            |
-   |       (4) (Keine COOKIE ECHO-Antwort)       |
-   |         (Port geschlossen oder inaktiv)   X |
-   |                                            |
+   |   (mit dem Verbindungscookie)                          |
+   | --------------------------------------->               |
+   |                                                        |
+   |        (3) COOKIE ECHO-Antwort (Port offen)            |
+   | <--------------------------------------                |
+   |                                                        |
+   |       (4) (Keine COOKIE ECHO-Antwort)                  |
+   |         (Port geschlossen oder inaktiv)   X            |
+   |                                                        |
 
 
 UDP Scan: Ein UDP-Scan sendet ein leeres UDP-Paket an jeden Port. Offene Ports sollten in der Regel mit einem ICMP Port Unreachable Paket antworten, wenn sie nicht in Gebrauch sind.\n
 
 Angreifer                                   Ziel-Host
 --------                                   ---------
-   |                                            |
-   |       (1) Leeres UDP-Paket (Port-Scan-Anfrage)    |
-   | ---------------------------------------> |
-   |                                            |
-   |        (2) ICMP Port Unreachable (Port geschlossen) |
-   | <---------------------------------------  |
-   |                                            |
-   |         (3) (Keine Antwort)                  |
-   |          (Offener Port)                  X |
-   |                                            |
+   |                                                    |
+   |       (1) Leeres UDP-Paket (Port-Scan-Anfrage)     |
+   | --------------------------------------->           |
+   |                                                    |
+   |        (2) ICMP Port Unreachable (Port geschlossen)|
+   | <---------------------------------------           |
+   |                                                    |
+   |         (3) (Keine Antwort)                        |
+   |          (Offener Port)                  X         |
+   |                                                    |
 
 IP Protocol Scan: Dieser Scan identifiziert, welche IP-Protokolle (wie TCP, UDP, ICMP, etc.) auf einem System verfügbar sind. Es wird durch Senden von IP-Paketen ohne zusätzliche Schicht 4 (TCP/UDP/etc.) durchgeführt. Jedes Protokoll, das nicht mit einem ICMP Protocol Unreachable Nachricht reagiert, wird als verfügbar betrachtet.\n
 
 Angreifer                                   Ziel-Host
 --------                                   ---------
-   |                                            |
-   |       (1) IP-Paket ohne Schicht 4 (Port-Scan-Anfrage) |
-   | ---------------------------------------> |
-   |                                            |
-   |        (2) ICMP Protocol Unreachable (Protokoll nicht verfügbar) |
-   | <---------------------------------------  |
-   |                                            |
-   |        (3) (Keine ICMP-Antwort)             |
-   |         (Protokoll verfügbar)            X |
-   |                                            |
+   |                                                                    |
+   |       (1) IP-Paket ohne Schicht 4 (Port-Scan-Anfrage)              |
+   | --------------------------------------->                           |
+   |                                                                    |
+   |        (2) ICMP Protocol Unreachable (Protokoll nicht verfügbar)   |
+   | <---------------------------------------                           |
+   |                                                                    |
+   |        (3) (Keine ICMP-Antwort)                                    |
+   |         (Protokoll verfügbar)            X                         |
+   |                                                                    |
 
 """
 
+# descripe help_port_types port_types = ["-p", "-F", "-p-", "--exclude-ports", "--top-ports", "--port-ratio"]
+help_port_types = "Die Auswahl des Portbereichs bestimmt, welche Ports gescannt werden.\n\n-p: Portbereich\n-F: Fast Scan\n-p-: Alle Ports\n--exclude-ports: Ausgeschlossene Ports\n--top-ports: Top Ports\n--port-ratio: Port-Verhältnis"
+help_port_types_detail = """
+Quelle: https://nmap.org/book/man-port-specification.html
 
-help_port_types = "Die Auswahl des Portbereichs bestimmt, welche Ports gescannt werden.\n\n-p: Portbereich\n-F: Fast Scan\n-p-: Alle Ports"
-help_port_types_detail = ""
+-p <Portbereiche> (Nur angegebene Ports scannen)
+Diese Option gibt an, welche Ports Sie scannen möchten und überschreibt die Standardeinstellung. Einzelne Portnummern sind ebenso zulässig wie durch einen Bindestrich getrennte Bereiche (z.B. 1-1023). Die Anfangs- und/oder Endwerte eines Bereichs können weggelassen werden, was dazu führt, dass Nmap 1 und 65535 verwendet. Sie können also -p- angeben, um Ports von 1 bis 65535 zu scannen. Das Scannen von Port Null ist zulässig, wenn Sie es ausdrücklich angeben. Bei IP-Protokoll-Scanning (-sO) gibt diese Option die Protokollnummern an, die Sie scannen möchten (0-255).
+Bei einem kombinierten Scan verschiedener Protokolle (z.B. TCP und UDP) können Sie ein bestimmtes Protokoll angeben, indem Sie den Portnummern T: für TCP, U: für UDP, S: für SCTP oder P: für IP-Protokoll voranstellen. Der Qualifizierer bleibt solange wirksam, bis Sie einen anderen Qualifizierer angeben. Zum Beispiel würde das Argument -p U:53,111,137,T:21-25,80,139,8080 UDP-Ports 53, 111 und 137 sowie die aufgelisteten TCP-Ports scannen. Beachten Sie, dass Sie zum Scannen von UDP und TCP -sU und mindestens einen TCP-Scan-Typ (wie -sS, -sF oder -sT) angeben müssen. Wenn kein Protokollqualifizierer gegeben ist, werden die Portnummern zu allen Protokolllisten hinzugefügt.
+Ports können auch nach dem Namen angegeben werden, nach dem der Port in den nmap-services bezeichnet wird. Sie können sogar die Platzhalter * und ? mit den Namen verwenden. Um zum Beispiel FTP und alle Ports zu scannen, deren Namen mit "http" beginnen, verwenden Sie -p ftp,http*. Seien Sie vorsichtig mit Shell-Erweiterungen und setzen Sie das Argument zu -p in Anführungszeichen, wenn Sie unsicher sind.
+Bereiche von Ports können von eckigen Klammern umgeben werden, um Ports innerhalb dieses Bereichs anzugeben, die in nmap-services erscheinen. Das folgende Beispiel scannt beispielsweise alle Ports in nmap-services, die gleich oder kleiner als 1024 sind: -p [-1024]. Seien Sie vorsichtig mit Shell-Erweiterungen und setzen Sie das Argument zu -p in Anführungszeichen, wenn Sie unsicher sind.
+
+-F (Schneller (begrenzter Port) Scan)
+Gibt an, dass Sie weniger Ports scannen möchten als standardmäßig. Normalerweise scannt Nmap die gebräuchlichsten 1.000 Ports für jedes gescannte Protokoll. Mit -F wird dies auf 100 reduziert.
+Nmap benötigt eine nmap-services-Datei mit Frequenzinformationen, um zu wissen, welche Ports am häufigsten sind (siehe den Abschnitt "Bekannte Portliste: nmap-services" für mehr Informationen über Portfrequenzen). Wenn keine Informationen zur Portfrequenz verfügbar sind, vielleicht wegen der Verwendung einer benutzerdefinierten nmap-services-Datei, scannt Nmap alle benannten Ports sowie die Ports 1-1024. In diesem Fall bedeutet -F, nur die Ports zu scannen, die in der Services-Datei benannt sind.
+
+-p- (Scannen aller Ports)
+Dieser Parameter in Nmap gibt an, dass alle Ports von 1 bis 65535 gescannt werden sollen. Standardmäßig scannt Nmap die gebräuchlichsten 1.000 Ports für jedes gescannte Protokoll. Wenn Sie jedoch -p- verwenden, weist dies Nmap an, den gesamten Bereich von Portnummern zu scannen.
+Dies kann nützlich sein, wenn Sie ein umfassendes Verständnis der offenen Ports auf einem bestimmten System erhalten möchten, aber es ist zu beachten, dass ein solcher umfassender Scan viel länger dauert als ein Scan, der sich auf die gebräuchlichsten Ports konzentriert.
+
+----------------------------------------------------------------------------
+
+offen
+Eine Anwendung nimmt aktiv TCP-Verbindungen, UDP-Datagramme oder SCTP-Verbindungen auf diesem Port an. Diese zu finden ist oft das Hauptziel des Port-Scannings. Sicherheitsbewusste Menschen wissen, dass jeder offene Port ein Angriffsweg ist. Angreifer und Pen-Tester wollen die offenen Ports ausnutzen, während Administratoren versuchen, sie mit Firewalls zu schließen oder zu schützen, ohne legitime Nutzer zu behindern. Offene Ports sind auch für nicht sicherheitsrelevante Scans interessant, da sie Dienste anzeigen, die im Netzwerk zur Verfügung stehen.
+
+geschlossen
+Ein geschlossener Port ist zugänglich (er empfängt und reagiert auf Nmap-Probe-Pakete), aber es hört keine Anwendung darauf. Sie können dabei helfen zu zeigen, dass ein Host auf einer IP-Adresse aktiv ist (Host-Erkennung oder Ping-Scanning) und als Teil der Betriebssystemerkennung. Da geschlossene Ports erreichbar sind, könnte es sich lohnen, sie später erneut zu scannen, falls einige geöffnet werden. Administratoren sollten in Erwägung ziehen, solche Ports mit einer Firewall zu blockieren. Dann würden sie im gefilterten Zustand erscheinen, der als nächstes besprochen wird.
+
+gefiltert
+Nmap kann nicht bestimmen, ob der Port offen ist, weil Paketfilterung verhindert, dass seine Sonden den Port erreichen. Die Filterung könnte von einem dedizierten Firewall-Gerät, Routerregeln oder hostbasierten Firewall-Software kommen. Diese Ports frustrieren Angreifer, weil sie so wenig Informationen liefern. Manchmal antworten sie mit ICMP-Fehlermeldungen wie Typ 3 Code 13 (Ziel unerreichbar: Kommunikation administrativ untersagt), aber Filter, die einfach Sonden ohne Antwort fallen lassen, sind weitaus häufiger. Dies zwingt Nmap, mehrmals nachzuprüfen, nur für den Fall, dass die Sonde aufgrund von Netzwerküberlastung anstatt Filterung abgeworfen wurde. Dies verlangsamt den Scan erheblich.
+
+ungefiltert
+Der ungefilterte Zustand bedeutet, dass ein Port zugänglich ist, aber Nmap kann nicht bestimmen, ob er offen oder geschlossen ist. Nur der ACK-Scan, der zum Abbilden von Firewall-Regelsätzen verwendet wird, klassifiziert Ports in diesen Zustand. Das Scannen von ungefilterten Ports mit anderen Scan-Typen wie Window-Scan, SYN-Scan oder FIN-Scan kann helfen zu klären, ob der Port offen ist.
+
+offen|gefiltert
+Nmap ordnet Ports in diesem Zustand zu, wenn es nicht bestimmen kann, ob ein Port offen oder gefiltert ist. Dies tritt bei Scan-Typen auf, bei denen offene Ports keine Antwort geben. Das Fehlen einer Antwort könnte auch bedeuten, dass ein Paketfilter die Sonde oder jede von ihr ausgelöste Antwort abgeworfen hat. Daher weiß Nmap nicht genau, ob der Port offen ist oder gefiltert wird. Die UDP, IP-Protokoll, FIN, NULL und Xmas-Scans klassifizieren Ports auf diese Weise.
+
+geschlossen|gefiltert
+Dieser Zustand wird verwendet, wenn Nmap nicht bestimmen kann, ob ein Port geschlossen oder gefiltert ist. Er wird nur für den IP-ID-Idle-Scan verwendet.
+
+"""
 
 help_host_discovery_types = "Die Option Host Discovery bestimmt, wie die Zielhosts gefunden werden.\n\n-sn: Ping Scan\n-Pn: Kein Ping"
 help_host_discovery_types_detail = ""
