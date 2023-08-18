@@ -21,9 +21,23 @@ def extract_mail_header_info(msg):
         'received': headers.get('received', []),
         'content_type': headers.get('content-type', None),
         'mime_version': headers.get('mime-version', None),
+        'reply-to': headers.get('reply-to', None),
+        'in-reply-to': headers.get('in-reply-to', None),
+        'references': headers.get('references', None),
+        'x-mailer': headers.get('x-mailer', None),
+        'x-originating-ip': headers.get('x-originating-ip', None),
+        'x-priority': headers.get('x-priority', None),
+        'dkim-signature': headers.get('dkim-signature', None),
+        'x-spam-status': headers.get('x-spam-status', None),
+        'x-spam-score': headers.get('x-spam-score', None),
+        'return-path': headers.get('return-path', None),
+        'sender': headers.get('sender', None),
+        'x-received': headers.get('x-received', None),
+        'Authentication-Results': headers.get("Authentication-Results", None),
     }
 
     return result
+
 
 def main():
     if len(sys.argv) < 2:
