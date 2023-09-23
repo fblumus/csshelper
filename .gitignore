@@ -1,1 +1,9 @@
 /mailhelp/*.msg
+/sqlhelp/env/
+/sqlhelp/env/*
+/sqlitehelp/env/*
+CSS-helper.code-workspace
+sqlhelp
+webhelp
+*.db
+*.sql

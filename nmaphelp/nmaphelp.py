@@ -4,6 +4,7 @@ import subprocess
 import tempfile
 
 
+
 def create_dropdown_menu(window, text, values, info, detail_info):
     frame = tk.Frame(window)
     frame.pack(fill=tk.X, padx=10, pady=5)
