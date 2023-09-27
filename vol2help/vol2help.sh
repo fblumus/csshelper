@@ -20,7 +20,7 @@
 
 # About
 autor="fblumus"
-version="0.1 Beta"
+version="0.2 Beta"
 
 # Initialize variables
 API_KEY="Your_API_KEY"
@@ -323,9 +323,11 @@ main() {
                     # show the selected file
                     run_and_display "imageinfo"
                     profile=$(echo "$last_output" | grep 'Suggested Profile(s)' | awk -F ': ' '{print $2}' | awk -F ', ' '{print $1}')
+                    profile="--profile=${profile}"
                     ;;
                 1)
                     read -p "Enter profile " profile
+                    profile="--profile=${profile}"
                     read -p "Enter file " selected_file
                     ;;
                 2)
