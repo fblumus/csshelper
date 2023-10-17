@@ -1,9 +1,43 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""
+Datei: sqliteanohelp.py
+Autor: Florian Blum
+Datum: 17.10.2023
+Lizenz: MIT
+
+Git: https://github.com/fblumus/csshelper/blob/main/sqlitehelp/sqliteanohelp.py
+
+Beschreibung:
+Das Skript ermöglicht es, SQL-Abfragen so zu modifizieren, dass bestimmte Felder der Abfrage anonymisiert werden.
+Dies kann nützlich sein, wenn man Daten teilen möchte, ohne bestimmte sensible Informationen offenzulegen.
+"""
+
 def identify_fields(query):
+    """
+    Identifiziert die abzufragenden Felder aus einem SQL SELECT-Statement.
+
+    Args:
+    - query (str): Das SQL SELECT-Statement.
+
+    Returns:
+    - list: Eine Liste der abzufragenden Felder.
+    """
     select_part = query.split("FROM")[0].replace("SELECT", "").strip()
     fields = [field.strip() for field in select_part.split(",")]
     return fields
 
 def get_date_positions(date_example):
+    """
+    Bestimmt die Position von Tag, Monat und Jahr in einem Datumsbeispiel.
+
+    Args:
+    - date_example (str): Ein Beispiel für ein Datum.
+
+    Returns:
+    - tuple: Die Positionen von Tag, Monat und Jahr und der verwendete Trenner.
+    """
     if "-" in date_example:
         separator = "-"
     elif "/" in date_example:
@@ -19,6 +53,15 @@ def get_date_positions(date_example):
     return day_pos, month_pos, year_pos, separator
 
 def get_anonymization_options(fields):
+    """
+    Fragt den Benutzer, wie er jedes Feld anonymisieren möchte.
+
+    Args:
+    - fields (list): Eine Liste von Feldnamen, die anonymisiert werden sollen.
+
+    Returns:
+    - list: Eine Liste der gewählten Anonymisierungsoptionen für jedes Feld.
+    """
     anonymized_fields = []
 
     for field in fields:
@@ -53,9 +96,17 @@ def get_anonymization_options(fields):
         
     return anonymized_fields
 
-
-
 def create_anonymized_query(query, anonymized_fields):
+    """
+    Erstellt eine anonymisierte SQL-Abfrage basierend auf den Benutzerwahlen.
+
+    Args:
+    - query (str): Das ursprüngliche SQL SELECT-Statement.
+    - anonymized_fields (list): Eine Liste der gewählten Anonymisierungsoptionen für jedes Feld.
+
+    Returns:
+    - str: Die anonymisierte SQL-Abfrage.
+    """
     select_part = ",\n  ".join(anonymized_fields)
     from_part_onwards = query.split("FROM")[1]
     anonymized_query = f"SELECT\n  {select_part}\nFROM{from_part_onwards}"

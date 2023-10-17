@@ -1,4 +1,5 @@
 /mailhelp/*.msg
+/mailhelp/env/
 /sqlhelp/env/
 /sqlhelp/env/*
 /sqlitehelp/env/*
@@ -7,3 +8,5 @@ sqlhelp
 webhelp
 *.db
 *.sql
+*.eml
+*.msg
