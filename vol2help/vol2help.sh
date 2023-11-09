@@ -237,7 +237,7 @@ open_editor() { # Open the file in the editor
 }
 
 run_and_display() { # Run volatility command and display the output
-    local cmd="volatility $profile -f $selected_file $1"
+    local cmd="volatility $profile -f /data/$selected_file $1"
     [ -n "$2" ] && cmd="$cmd $2"
     [ -n "$3" ] && cmd="$cmd $3"
     cmd="$cmd "

@@ -3,6 +3,8 @@
 /sqlhelp/env/
 /sqlhelp/env/*
 /sqlitehelp/env/*
+/zaphelp/env/*
+/scapyhelp/env/*
 CSS-helper.code-workspace
 sqlhelp
 webhelp
@@ -10,3 +12,9 @@ webhelp
 *.sql
 *.eml
 *.msg
+*.html
+*.xml
+*.diff
+*.txt
+*.pcap
+*.mem
