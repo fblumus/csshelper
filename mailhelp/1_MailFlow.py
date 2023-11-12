@@ -1,54 +1,14 @@
-import re
-import email
+from email import message_from_file
+from email.utils import getaddresses, parseaddr
 import networkx as nx
 import matplotlib.pyplot as plt
-import extract_msg
-from email.utils import getaddresses, parseaddr
 from matplotlib.lines import Line2D
 
 
-def get_msg_from_file(filename):
-    if filename.endswith(".eml"):
-        with open(filename, "r", encoding="utf-8") as f:
-            return email.message_from_string(f.read())
-    elif filename.endswith(".msg"):
-        msg_file = extract_msg.Message(filename)
-        header_str = '\n'.join(f"{key}: {value}" for key, value in msg_file.header.items())
-        return email.message_from_string(header_str + '\n\n' + msg_file.body)
-    else:
-        raise ValueError("Nicht unterstütztes Dateiformat.")
+def eml_graph(filename):
+    with open(filename, 'r') as f:
+        msg = message_from_file(f)
 
-
-def visualize_hops(msg):
-    received_headers = msg.get_all('Received')
-    if not received_headers:
-        print("Keine 'Received'-Header gefunden.")
-        return
-
-    received_headers.reverse()
-
-    # Graph
-    G = nx.DiGraph()
-
-    # Vorbereiten des Plots
-    plt.figure(figsize=(10, 6))
-    plt.title('Email Hops Visualization')
-
-    hops = []
-    for header in received_headers:
-        match = re.search(r'from\s(.*?)\sby', header)
-        if match:
-            hops.append(match.group(1))
-
-    for i in range(len(hops) - 1):
-        G.add_edge(hops[i], hops[i + 1])
-
-    pos = nx.spring_layout(G, seed=227)
-    nx.draw(G, pos, with_labels=True, node_size=2000, node_color="skyblue", node_shape="s", alpha=0.5, linewidths=40)
-    plt.show()
-
-
-def eml_graph(msg):
     G = nx.MultiDiGraph()  # create empty graph
     (source_name, source_addr) = parseaddr(msg["From"])  # sender
 
@@ -74,7 +34,6 @@ def eml_graph(msg):
 
     return G, source_addr, original_to
 
-
 def draw_colored_graph(G, source_addr, original_to):
     node_colors = []
 
@@ -92,6 +51,7 @@ def draw_colored_graph(G, source_addr, original_to):
     ax.margins(0.08)
     
     # Legende hinzufügen
+    
     legend_elements = [Line2D([0], [0], marker='o', color='w', markerfacecolor='green', markersize=10, label='Absender'),
                        Line2D([0], [0], marker='o', color='w', markerfacecolor='blue', markersize=10, label='Endgültiger Empfänger'),
                        Line2D([0], [0], marker='o', color='w', markerfacecolor='red', markersize=10, label='Andere')]
@@ -99,16 +59,10 @@ def draw_colored_graph(G, source_addr, original_to):
 
     plt.show()
 
+G, source_addr, original_to = eml_graph("mail.eml")
 
-if __name__ == "__main__":
-    filename = "mail.eml"  # oder "mail.eml"
-    msg = get_msg_from_file(filename)
+# print edges with message subject
+for u, v, d in G.edges(data=True):
+    print(f"From: {u} To: {v} Subject: {d['message']['Subject']}")
 
-    # Visualisierung der Hops
-    visualize_hops(msg)
-
-    # Visualisierung von Absender, Empfänger und CCs
-    G, source_addr, original_to = eml_graph(msg)
-    for u, v, d in G.edges(data=True):
-        print(f"From: {u} To: {v} Subject: {d['message']['Subject']}")
-    draw_colored_graph(G, source_addr, original_to)
+draw_colored_graph(G, source_addr, original_to)

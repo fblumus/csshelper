@@ -11,8 +11,8 @@ zap = ZAPv2(apikey=apikey, proxies={'http': 'http://127.0.0.1:8090', 'https': 'h
 context_name = 'auth_context'
 username_parameter = 'username'  
 password_parameter = 'password'
-logged_in_indicator = '.*Logout.*'  # Adjust to the application's logout regex pattern
-logged_out_indicator = '.*Login.*'  # Adjust to the application's login regex pattern
+#logged_in_indicator = '.*Logout.*'  # Adjust to the application's logout regex pattern
+#logged_out_indicator = '.*Login.*'  # Adjust to the application's login regex pattern
 
 # Credentials (replace with the actual credentials)
 username = 'corwin.louisa@example.com'
@@ -26,8 +26,8 @@ def setup_authentication(target_url, login_url):
     login_request_data = 'email={%username%}&password={%password%}' # Use 'email' instead of 'username' as per your specifications
     form_based_config = 'loginUrl=' + urllib.parse.quote(login_url) + '&loginRequestData=' + urllib.parse.quote(login_request_data)
     zap.authentication.set_authentication_method(context_id, 'formBasedAuthentication', form_based_config)
-    zap.authentication.set_logged_in_indicator(context_id, logged_in_indicator)
-    zap.authentication.set_logged_out_indicator(context_id, logged_out_indicator)
+    #zap.authentication.set_logged_in_indicator(context_id, logged_in_indicator)
+    #zap.authentication.set_logged_out_indicator(context_id, logged_out_indicator)
     
     user_id = zap.users.new_user(context_id, 'Auth User')
     zap.users.set_authentication_credentials(context_id, user_id, username_parameter + '=' + username + '&' + password_parameter + '=' + password)

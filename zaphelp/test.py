@@ -38,7 +38,7 @@ def set_form_based_auth():
 def set_user_auth_config():
     user = 'EXAM'
     username = 'corwin.louisa@example.com'
-    password = '	user1234'
+    password = 'user1234'
 
     user_id = zap.users.new_user(context_id, user)
     user_auth_config = 'username=' + urllib.parse.quote(username) + '&password=' + urllib.parse.quote(password)

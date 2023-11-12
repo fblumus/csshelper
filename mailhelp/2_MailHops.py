@@ -6,7 +6,7 @@ import networkx as nx
 import matplotlib.patches as patches
 
 
-filename = "mail2.msg"  # Oder "mail.msg"
+filename = "mail.eml"  # Oder "mail.msg"
 
 if filename.endswith(".eml"):
     with open(filename, "r", encoding="utf-8") as f:
